@@ -2,7 +2,7 @@
 basedir=$(cd $(dirname $0); pwd)
 chroot=$basedir/chroot
 
-if [ `whoami` == 'root' ]; then
+if [ $(whoami) == 'root' ]; then
    echo "Must not be run as root."
    exit 1;
 fi
@@ -18,7 +18,7 @@ create_chroot() {
             exe mkarchroot $chroot/root base-devel
             # install cower:
             gpg --recv-keys --keyserver hkp://pgp.mit.edu 1EB2638FF56C0C53
-            TMP_BUILD=`mktemp -d`
+            TMP_BUILD=$(mktemp -d)
             exe cd $TMP_BUILD
             curl https://aur.archlinux.org/cgit/aur.git/snapshot/cower.tar.gz | tar xz
             exe cd cower
@@ -170,7 +170,7 @@ update() {
                 return 1
             fi
             # Use a temporary dir to download all PKGBUILDS atomically
-            [ -z "$tmp_dl" ] && tmp_dl=`mktemp -d`
+            [ -z "$tmp_dl" ] && tmp_dl=$(mktemp -d)
             cd $tmp_dl
             arch-nspawn $chroot/root --bind=$tmp_dl:/src cower -q -t /src -d -d $pkg >/dev/null 2>&1
             cp -a * $basedir/src
@@ -241,7 +241,7 @@ build() {
         fi
         echo "## Updating repository database"
         cd $basedir/$repo_name
-        if [ `ls *.pkg.tar.xz 2> /dev/null | wc -l` -lt 1 ]; then
+        if [ $(ls *.pkg.tar.xz 2> /dev/null | wc -l) -lt 1 ]; then
             echo "No packages found in $basedir/$repo_name"
             return 1;
         fi
