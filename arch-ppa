@@ -251,10 +251,49 @@ build() {
     )
 }
 
+help() {
+    (
+        cd $basedir
+        script_source=$(git remote get-url origin 2>/dev/null)
+        script_version=$(git rev-list --count origin/master $0 2>/dev/null)
+        extra_version=$(git rev-list --count origin/master..HEAD $0 2>/dev/null)
+        if [ $? -ne 0 ]; then
+            script_source="unknown"
+            script_version="unknown"
+            extra_version="0"
+        fi
+        if [ "$extra_version" != "0" ]; then
+            script_version=$script_version[+$extra_version]
+        fi
+        echo "\
+$0: Arch linux personal package archive tool
+Usage: $0 <command> [<arg> ...]
+
+Package management commands:
+      add <package> [...]           Downloads package specifications from AUR
+      update                        Download updated versions of all packages
+      update <package> [...]        Update specific packages + dependencies
+      sign_packages <package> [...] Sign packages with your GPG key
+
+Repository management commands:
+      build <repository>                   Builds a repo with all packages
+      build <repository> [package ...]     Builds a repo with specific packages
+      clean <repository>                   Destroys the specified repo
+      list <repository>                    Lists all packages in a repo
+      package_build <repository> <package> Build a package and add it to a repo
+
+Other commands:
+      help                          Show this message
+      setup                         Initialize directories for arch-ppa
+
+Script version $script_version from $script_source\
+"
+    )
+}
 
 if [ "$#" -gt 0 ]; then
     $*
 else
-    echo "Must specify a command, eg: add, build, list, clean"
+    help
     exit 1
 fi
