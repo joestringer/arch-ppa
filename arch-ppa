@@ -234,7 +234,8 @@ build() {
         else
             # Build all packages:
             cd $basedir/src
-            find -type d | sed 's/\.\///' | tail -n +2 | while read pkg; do
+            find -maxdepth 2 -name PKGBUILD | while read path; do
+                pkg=$(dirname $path)
                 package_build $repo_name $pkg
             done
             echo "## All packages built"
