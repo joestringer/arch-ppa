@@ -252,7 +252,7 @@ build() {
         fi
         for pkg in "$packages"; do
             sign_packages $pkg*.pkg.tar.xz
-            repo-add $repo_name.db.tar.gz $pkg*.pkg.tar.xz
+            repo-add -n $repo_name.db.tar.gz $pkg*.pkg.tar.xz
         done
         sign_packages $repo_name.db
     )
