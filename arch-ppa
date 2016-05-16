@@ -227,27 +227,33 @@ build() {
         shift
         if [ "$#" -gt 0 ]; then
             # Build only requested packages
-            for pkg in "$@"; do
-                package_build $repo_name $pkg
-            done
-            echo "## All requested packages built"
+            packages="$@"
         else
             # Build all packages:
             cd $basedir/src
-            find -maxdepth 2 -name PKGBUILD | while read path; do
-                pkg=$(dirname $path)
-                package_build $repo_name $pkg
-            done
-            echo "## All packages built"
+            packages=$(find -maxdepth 2 -name PKGBUILD | while read path; do
+                            dirname $path
+                       done)
         fi
+        if [ "$packages" = "" ]; then
+            echo "No packages found or specified"
+            return 1;
+        fi
+        for pkg in "$packages"; do
+            package_build $repo_name $pkg
+        done
+            echo "## All requested packages built"
+        echo "## All requested packages built"
         echo "## Updating repository database"
         cd $basedir/$repo_name
         if [ $(ls *.pkg.tar.xz 2> /dev/null | wc -l) -lt 1 ]; then
             echo "No packages found in $basedir/$repo_name"
             return 1;
         fi
-        sign_packages *.pkg.tar.xz
-        repo-add $repo_name.db.tar.gz *.pkg.tar.xz
+        for pkg in "$packages"; do
+            sign_packages $pkg*.pkg.tar.xz
+            repo-add $repo_name.db.tar.gz $pkg*.pkg.tar.xz
+        done
         sign_packages $repo_name.db
     )
 }
